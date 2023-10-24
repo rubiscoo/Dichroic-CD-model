@@ -8,4 +8,18 @@ Three inputs are needed:
 2) temperature in °C
 3) molar ellipticity: in deg cm2 dmol-1 per peptide unit
 
-Program returns propagation parameter w and fractional helicity (<fH>.
+Program returns propagation parameter w and fractional helicity (<fH>).
+
+Rest of the parameters are fixed according to the global fit of CD data in article "Analysis of the peptide helicity using an ensemble spectroscopic model with re-calibrated parameters".
+
+Helix spectroscopic parameters
+[θ]H∞ = -41,000
+∂[θ]H∞/∂T = 100
+k = 3.4
+
+Coil spectroscopic parameters
+[θ]C = 2,100
+∂[θ]C/∂T =-45
+
+Nucleation constant (helix-coil parameter)
+v = 0.07
