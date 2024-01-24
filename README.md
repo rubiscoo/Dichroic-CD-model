@@ -1,26 +1,17 @@
-# Dichroic-CD-model
-Dichroic CD model for fitting observed ellipticities
+# Ensemble dichroic model peptide helicity estimator
 
-Both folders (Q_total and Q_double_H) should be in the same directory as main script (single_fit_dichroic_estimator.py).
+Python script to estimate helical peptide helicity from measured molar residue ellipticity (MRE).
 
-Three inputs are needed:
-1) N- chain lenght in residues (up to 32)
-2) temperature in °C
-3) molar ellipticity: in deg cm2 dmol-1 per peptide unit
+<b> Requirements: </b>
+- installed python3
+- standard libraries: numpy, scipy
 
-Program returns propagation parameter w and fractional helicity (<fH>).
+<b> Instructions for use: </b>
+1. Clone/download the repository. The folder should contain the python script (.py) along with folders <i>Q_total</i> and <i>Q_double_H</i>, that contain partition function polynomials needed for calculation.
+2. Navigate to the folder using terminal/command line [ cd ./folder/folder/ ]
+3. Run the script using python3 command [ python3 script.py ]
+4. Define three requested input parameters: <b>N</b> (number of residues), <b>temperature</b> (in °C) and measured <b>MRE</b> (in deg cm<sup>2</sup> dmol<sup>-1</sup> per peptide unit)
+   
+<b> OUTPUT (result): </b> Program returns propagation parameter <b><i>w</i></b> and fractional helicity <b><i>f<sub>H</sub></i></b>.
 
-Rest of the parameters are fixed according to the global fit of CD data in article "Analysis of the peptide helicity using an ensemble spectroscopic model with re-calibrated parameters".
-
-
-[θ]H∞ = -41,000
-
-∂[θ]H∞/∂T = 100
-
-k = 3.4
-
-[θ]C = 2,100
-
-∂[θ]C/∂T =-45
-
-v = 0.07
+Default parameters are those obtained from global fit of CD data (AAKAA<sub>n</sub> series of peptides and CCs). See article "Analysis of the peptide helicity using an ensemble spectroscopic model with re-calibrated parameters".
