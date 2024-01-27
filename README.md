@@ -14,4 +14,4 @@ Python script to estimate helical peptide helicity from measured molar residue e
    
 <b> OUTPUT (result): </b> Program returns propagation parameter <b><i>w</i></b> and fractional helicity <b><i>f<sub>H</sub></i></b>.
 
-Default parameters are those obtained from global fit of CD data (AAKAA<sub>n</sub> series of peptides and CCs). See article "Analysis of the peptide helicity using an ensemble spectroscopic model with re-calibrated parameters".
+Default parameters are those obtained from global fit of CD data (AAKAA<sub>n</sub> series of peptides and CCs). See article "Estimation of peptide helicity from circular dichroism using the ensemble model ".
