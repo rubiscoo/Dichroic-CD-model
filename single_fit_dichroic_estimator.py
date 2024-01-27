@@ -10,8 +10,7 @@ import re
 import os
 from scipy import optimize
 
-
-#Extract powers of v and w from a given polynomial term.
+#Extract powers of v and w from a given partition function polynomial term.
 def extract_powers(term): 
     v_power, w_power = 0, 0
     v_match = re.search(r'v\*\*(\d+)', term)
@@ -37,11 +36,9 @@ def extract_coefficient(term):
         return int(match.group(1))
     return 1
 
-#Counting of single and double H-bonded states in single-helix states
+#Counting of single and double H-bonded states in single-helix states (up to v**5)
 def vw_powers(v_st,w_st,n):
-    h1,h2=0,0
-
-    if (v_st==2 or v_st==3 or v_st==4 or v_st==5) and w_st > 0: #enojni heliks
+    if (v_st==2 or v_st==3 or v_st==4 or v_st==5) and w_st > 0:
         if w_st >3:
             h2= (w_st + 3) - 6
         else:
@@ -58,7 +55,7 @@ def vw_powers(v_st,w_st,n):
 #Counting of single and double H-bonded states in double-helix states
 def vw_powers_double(v_st,w_st,n):
     h1_d,h2_d,c_d=0,0,0
-
+    
     if w_st<5 and w_st>1:
         h2_d=0
         h1_d=w_st+6
@@ -77,7 +74,7 @@ def vw_powers_double(v_st,w_st,n):
         
     return (h1_d,h2_d,c_d)
 
-# DEFINES the size of VW matrix
+#  v**n x w**m MATRIX
 v_pow_max,w_pow_max = 5,30 #max powers of v, w for v**n x w**m matrix -SAME for all the polynomials
 
 T0 = 273.15
@@ -86,9 +83,10 @@ R = 1.987*10**(-3)
 """
 SPECTROSCOPIC WEIGHTS matrix generator
 """
+
 def spectro_matrices(v_Pow_max,w_Pow_max): #RETURNS matrices to calculate contribution of each P term
-    h1,h2,h1_d,h2_d=0,0,0,0
-    matrix_h1 = np.zeros((v_pow_max+1 ,w_pow_max+1), dtype=int)
+
+    matrix_h1 = np.zeros((v_pow_max+1 ,w_pow_max+1), dtype=int) # matrix of single-bonded helix 
     matrix_h2 = np.zeros((v_pow_max+1 ,w_pow_max+1), dtype=int)
     matrix_double_h1 = np.zeros((v_pow_max+1 ,w_pow_max+1), dtype=float)
     matrix_double_h2 = np.zeros((v_pow_max+1 ,w_pow_max+1), dtype=float)
@@ -114,7 +112,7 @@ def spectro_matrices(v_Pow_max,w_Pow_max): #RETURNS matrices to calculate contri
     
     return (M_H2,M_H1,M_double_H2,M_double_H1)
 
-# POLYNOMIAL to MATRIX REPRESENTATION
+# Partition function polynomial to MATRIX (array)
 def polynomial_to_matrix(poly,v_Pow_max,w_Pow_max):
     terms = poly.split('+')
     max_v_power, max_w_power = v_Pow_max,w_Pow_max
@@ -147,24 +145,37 @@ def matrix_vw(v,w,v_pow_max,w_pow_max):
     return wv.transpose(1, 2, 0).reshape(len(w), -1)
 
 
-n_input=int(input("N:"))
+###################
+#
+#    Inputs ( temperature (°C), n - number of residues, experimental ellipticity in deg cm2 dmol-1 per peptide bond)
+#
+##################
+
+n_input = int(input("N:")) #define number of peptide bonds -> N_res-1 for unblocked and N_res+1 for blocked (N- and C-) peptides
+t_input = float(input("Temperature [°C]:")) # experimental temperature in degrees Celzius
+Y = float(input("Molar ellipticity [deg cm2 dmol-1 per peptide bond]:")) # measured MRE (molar residue ellipticity)	
+
+###################################
+
+
+t_C=np.array([t_input])
 Ns=[n_input]
 
-#### get polynomial for all helices (up to v**5) and double helices v**4
+#### get polynomials (partition function) for all helices (up to v**5) and double helices v**4
 path=os.getcwd()
 with open(path+"/Q_total/Q_total_"+str(n_input)+".txt",'r') as l:
     poly_total=l.readlines()[0]
-with open(path+"/Q_double_h/Q_doubleH_"+str(n_input)+".txt",'r') as l:
+with open(path+"/Q_double_H/Q_doubleH_"+str(n_input)+".txt",'r') as l:
     poly_double=l.readlines()[0]
 
-
-t_input=float(input("Temperature [°C]:"))
-t_C=np.array([t_input])
-Y=float(input("Molar ellipticity [deg cm2 dmol-1 per peptide bond]:"))			
-
+########################
+#
+#    MATRICES
+#
+########################
 coef_matrix_polys_total=[polynomial_to_matrix(poly_total,v_pow_max,w_pow_max).transpose().flatten()] #overall coeficients
 coef_matrix_polys_double=[polynomial_to_matrix(poly_double,v_pow_max,w_pow_max).transpose().flatten()]#double helices
-coef_matrix_polys_single=[coef_matrix_polys_total[0]-coef_matrix_polys_double[0] ] #single helikis
+coef_matrix_polys_single=[coef_matrix_polys_total[0]-coef_matrix_polys_double[0] ] #single helices
 
 M_H2,M_H1,M_double_H2,M_double_H1 = spectro_matrices(v_pow_max, w_pow_max)
 
@@ -172,10 +183,15 @@ M_H2,M_H1,M_double_H2,M_double_H1 = spectro_matrices(v_pow_max, w_pow_max)
 MH_matrices=M_H2,M_H1,M_double_H2,M_double_H1
 temps=t_C;data_cd=Y
 
-DICHROIC_MODEL_FIT_PARAMS=[0.07,-41000,100,3.4,2100,-45]
+################
+#
+# Default model parameters obtained from global fit of CD data (see Article)
+#
+################
 
+DICHROIC_MODEL_FIT_PARAMS=[0.07,-41000,100,3.4,2100,-45] # v, H2_inf, dH2/dT, k, Coil_T0, dCoil/dT
 
-def MODEL_CD(ww):
+def MODEL_CD(ww): # fitting function -> returns difference between input ellipticity (Y) and model-calculated value
     w= np.array([ww])
     v,H2,dH2,k,C,dC=DICHROIC_MODEL_FIT_PARAMS
     
@@ -206,7 +222,8 @@ def FH(w_opt):
 
 
 try:
-    root = optimize.brentq(CD_opt,0.05,4.1,xtol=2e-6, rtol=8.8e-12)
-    print("w = "+str(round(root,3))+", "+"<fH> = "+str(round(FH(root),3)))
+    root = optimize.brentq(CD_opt,0.05,4.1,xtol=2e-6, rtol=8.8e-12) # minimize the function CD_opt to fit the input ellipticity Y
+    print("w = "+str(round(root,3))+", "+"<fH> = "+str(round(FH(root),3))) #output -> w (propagation parameter) and <fH> (fractional helicity)
+
 except:
-    print("Input values of ellipticity out of sensible range.")
+    print("Input values of ellipticity out of reasonable range.")
