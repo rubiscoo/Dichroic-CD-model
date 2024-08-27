@@ -36,7 +36,7 @@ def extract_coefficient(term):
         return int(match.group(1))
     return 1
 
-#Counting of single and double H-bonded states in single-helix states (up to v**5)
+#Counting of single and double H-bonded microstates in single-helix states (up to v**5)
 def vw_powers(v_st,w_st,n):
     if (v_st==2 or v_st==3 or v_st==4 or v_st==5) and w_st > 0:
         if w_st >3:
@@ -52,7 +52,7 @@ def vw_powers(v_st,w_st,n):
         
     return (h1,h2,c)
 
-#Counting of single and double H-bonded states in double-helix states
+#Counting of single and double H-bonded states in double-helix microstates.
 def vw_powers_double(v_st,w_st,n):
     h1_d,h2_d,c_d=0,0,0
     
@@ -75,16 +75,14 @@ def vw_powers_double(v_st,w_st,n):
     return (h1_d,h2_d,c_d)
 
 #  v**n x w**m MATRIX
-v_pow_max,w_pow_max = 5,30 #max powers of v, w for v**n x w**m matrix -SAME for all the polynomials
+v_pow_max,w_pow_max = 5,38 #max powers of v, w for v**n x w**m matrix -SAME for all the polynomials (max=38 for peptide with 40 units)
 
-T0 = 273.15
-R = 1.987*10**(-3)
 
 """
 SPECTROSCOPIC WEIGHTS matrix generator
 """
 
-def spectro_matrices(v_Pow_max,w_Pow_max): #RETURNS matrices to calculate contribution of each P term
+def spectro_matrices(v_Pow_max,w_Pow_max): #RETURNS matrices to calculate CD contribution of each partition function polynomial term
 
     matrix_h1 = np.zeros((v_pow_max+1 ,w_pow_max+1), dtype=int) # matrix of single-bonded helix 
     matrix_h2 = np.zeros((v_pow_max+1 ,w_pow_max+1), dtype=int)
@@ -157,11 +155,10 @@ Y = float(input("Molar ellipticity [deg cm2 dmol-1 per peptide bond]:")) # measu
 
 ###################################
 
-
 t_C=np.array([t_input])
 Ns=[n_input]
 
-#### get polynomials (partition function) for all helices (up to v**5) and double helices v**4
+#### get polynomials (partition function) for all helices (up to v**5) and double helices
 path=os.getcwd()
 with open(path+"/Q_total/Q_total_"+str(n_input)+".txt",'r') as l:
     poly_total=l.readlines()[0]
